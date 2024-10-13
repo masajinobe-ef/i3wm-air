@@ -72,10 +72,12 @@ export SUDO_EDITOR="nvim"
 export VISUAL="nvim"
 export TERM="xterm-256color"
 export BROWSER="chromium"
-export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
 export ARCHFLAGS="-arch x86_64"
 export RUST_BACKTRACE=1
+
+export PATH="$HOME/.cargo/bin:$PATH"
+. "$HOME/.cargo/env"
 
 # ╔══════════════════════════════════════════════════════════════════════╗
 # ║                             Aliases                                  ║
@@ -96,8 +98,15 @@ alias b="bat"
 alias cat="bat"
 alias grep="rg"
 
+# Package Manager
+alias orph="pacman -Rns $(pacman -Qdtq)"
+
 # Notifications and Dunst Management
 alias dun='killall dunst && dunst & notify-send "cool1" "yeah it is working" && notify-send "cool2" "yeah it is working"'
+
+# IP
+alias ipv4="ip addr show | grep 'inet ' | grep -v '127.0.0.1' | cut -d' ' -f6 | cut -d/ -f1"
+alias ipv6="ip addr show | grep 'inet6 ' | cut -d ' ' -f6 | sed -n '2p'"
 
 # Terminal Management
 alias cls="clear"
@@ -113,8 +122,12 @@ alias cp="cp -vr"
 alias mkdir="mkdir -p"
 
 # Archiving
-alias utar="tar -zxvf"
-alias mtar="tar -zcvf"
+alias tgz='tar -cvvzf'
+alias tbz2='tar -cvvjf'
+alias utgz='tar -xvvzf'
+alias utbz2='tar -xvvjf'
+alias mktar='tar -cvvf'
+alias untar='tar -xvvf'
 alias zz='zip -r'
 alias uz='unzip'
 
@@ -127,12 +140,35 @@ alias mirror-update="sudo reflector --verbose --protocol https --age 12 --sort r
 # ╚══════════════════════════════════════════════════════════════════════╝
 
 function yy() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+}
+
+# ╔══════════════════════════════════════════════════════════════════════╗
+# ║                          Search Function                             ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+
+function zs() {
+  RELOAD='reload:rg --column --color=always --smart-case {q} || :'
+  OPENER='if [[ $FZF_SELECT_COUNT -eq 0 ]]; then
+            nvim {1} +{2}     # No selection. Open the current line in Neovim.
+          else
+            nvim +cw -q {+f}  # Build quickfix list for the selected items.
+          fi'
+
+  fzf --disabled --ansi --multi \
+      --bind "start:$RELOAD" --bind "change:$RELOAD" \
+      --bind "enter:become:$OPENER" \
+      --bind "ctrl-o:execute:$OPENER" \
+      --bind 'alt-a:select-all,alt-d:deselect-all,ctrl-/:toggle-preview' \
+      --delimiter : \
+      --preview 'bat --style=full --color=always --highlight-line {2} {1}' \
+      --preview-window '~4,+{2}+4/3,<80(up)' \
+      --query "$@"
 }
 
 # ╔══════════════════════════════════════════════════════════════════════╗
@@ -151,4 +187,4 @@ eval "$(zoxide init zsh)"
 # ║                      Autorun                                         ║
 # ╚══════════════════════════════════════════════════════════════════════╝
 
-clear
+

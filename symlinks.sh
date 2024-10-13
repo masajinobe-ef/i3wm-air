@@ -27,8 +27,13 @@ log_message() {
 
 # Error handling function
 exit_with_error() {
-    echo -e "${RED}Error: $1${NC}"
-    log_message "Error: $1"
+    local message="$1"
+    local details="$2"
+    echo -e "${RED}Error: $message${NC}"
+    log_message "Error: $message"
+    if [ -n "$details" ]; then
+        log_message "Details: $details"
+    fi
     exit 1
 }
 
@@ -36,27 +41,39 @@ exit_with_error() {
 git_operations() {
     cd "$DOTFILES_DIR" || exit_with_error "Could not change to directory $DOTFILES_DIR"
 
+    # Check if the directory is a Git repository
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        log_message "Not a Git repository: $DOTFILES_DIR"
+        echo -e "${RED}Error: $DOTFILES_DIR is not a Git repository.${NC}"
+        return
+    fi
+
     # Fetch and compare with the remote branch
     git fetch
     if ! git diff --quiet HEAD origin/"$BRANCH"; then
         echo -e "${BLUE}Local repository is not up-to-date. Pulling changes...${NC}"
-        git pull --rebase origin "$BRANCH" || exit_with_error "Could not pull changes"
+        if git pull --rebase origin "$BRANCH"; then
+            echo -e "${GREEN}Repository successfully updated.${NC}"
+            log_message "Repository successfully updated."
+        else
+            local error_details=$(git pull --rebase origin "$BRANCH" 2>&1)
+            exit_with_error "Failed to pull changes" "$error_details"
+        fi
+    else
+        echo -e "${BLUE}Repository is already up-to-date.${NC}"
+        log_message "Repository is already up-to-date."
     fi
 
     # Add and commit changes if any
     git add .
     if ! git diff-index --quiet HEAD --; then
         git commit -m "Update configurations: $(date '+%Y-%m-%d %H:%M:%S')" || exit_with_error "Could not commit changes"
-        echo -e "${GREEN}Do you want to push the changes? (y/n)${NC}"
-        read -r push_answer
-
-        if [[ "$push_answer" == "y" ]]; then
-            git push origin "$BRANCH" || exit_with_error "Could not push changes"
+        if git push origin "$BRANCH"; then
             echo -e "${GREEN}Changes successfully pushed to the remote repository.${NC}"
             log_message "Changes successfully pushed to the remote repository."
         else
-            echo -e "${GREEN}Push aborted by user.${NC}"
-            log_message "Push aborted by user."
+            local error_details=$(git push origin "$BRANCH" 2>&1)
+            exit_with_error "Could not push changes" "$error_details"
         fi
     else
         echo -e "${BLUE}No changes to commit or push.${NC}"
@@ -70,9 +87,13 @@ if ! command -v "$STOW_CMD" >/dev/null 2>&1; then
     read -r install_answer
     if [[ "$install_answer" == "y" ]]; then
         echo -e "${BLUE}Installing stow...${NC}"
-        sudo pacman -S --noconfirm stow || exit_with_error "Could not install stow."
-        echo -e "${GREEN}stow successfully installed.${NC}"
-        log_message "stow successfully installed."
+        if sudo pacman -S --noconfirm stow; then
+            echo -e "${GREEN}stow successfully installed.${NC}"
+            log_message "stow successfully installed."
+        else
+            local error_details=$(sudo pacman -S --noconfirm stow 2>&1)
+            exit_with_error "Could not install stow" "$error_details"
+        fi
     else
         exit_with_error "Aborting due to missing stow installation."
     fi
@@ -94,10 +115,14 @@ stow_directory() {
     # Check if target directory exists, create if not
     if [ ! -d "$target" ]; then
         echo -e "${GREEN}Target directory $target does not exist. Creating it...${NC}"
-        mkdir -p "$target" || exit_with_error "Could not create target directory $target"
+        if mkdir -p "$target"; then
+            log_message "Created target directory: $target"
+        else
+            exit_with_error "Could not create target directory" "$target"
+        fi
     fi
 
-    if [ -d "$dir" ]; then
+    if [ -d "$dir" ] && [ "$(ls -A "$dir")" ]; then
         echo -e "${BLUE}Stowing $dir to $target...${NC}"
 
         local package_name=$(basename "$dir")
@@ -141,19 +166,33 @@ stow_directory() {
             fi
         done
 
-        $STOW_CMD --target="$target" "$package_name" || exit_with_error "Error stowing $dir to $target"
+        if $STOW_CMD --target="$target" "$package_name"; then
+            log_message "Successfully stowed $dir to $target"
+        else
+            local error_details=$($STOW_CMD --target="$target" "$package_name" 2>&1)
+            exit_with_error "Error stowing $dir to $target" "$error_details"
+        fi
     else
-        log_message "Warning: Directory not found: $dir"
+        exit_with_error "Directory not found or empty: $dir"
     fi
 }
 
-# Stow all directories to their respective targets
+# Stow all directories to their respective targets, exit if any directory is missing
+if [ ! -d "$BIN_DIR" ] || [ ! -d "$CONFIG_DIR" ] || [ ! -d "$HOME_DIR" ]; then
+    exit_with_error "One or more required directories (bin, config, home) do not exist."
+fi
+
+# Perform stowing
 stow_directory "$BIN_DIR" "$TARGET_BIN"
 stow_directory "$CONFIG_DIR" "$TARGET_CONFIG"
 stow_directory "$HOME_DIR" "$TARGET_HOME"
 
-echo -e "${GREEN}All directories stowed successfully.${NC}"
-log_message "All directories stowed successfully."
+# If all directories were stowed successfully, log and notify
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}All directories stowed successfully.${NC}"
+    log_message "All directories stowed successfully."
+    notify-send "Symlinks Script" "Symlinks have been created successfully."
+fi
 
 echo "Press Enter to exit..."
 read
