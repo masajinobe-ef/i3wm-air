@@ -1,0 +1,6 @@
+# Load the ALSA sink with specified parameters
+load-module module-alsa-sink device=hw:0,0 channels=1 rate=44100 format=s16le
+
+# Set the default sink to the newly created mono sink
+set-default-sink alsa_output.hw_0_0
+
