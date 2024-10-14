@@ -34,7 +34,7 @@ default_floating_border none
 
 exec --no-startup-id dunst --config ~/.config/dunst/dunstrc &
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-exec --no-startup-id feh --recursive --bg-fill --no-fehbg --randomize ~/Wallpapers/* &
+# exec --no-startup-id feh --recursive --bg-fill --no-fehbg --randomize ~/Wallpapers/* &
 # exec sh ~/.local/bin/autorun &
 
 # ╔══════════════════════════════════════════════════════════════════════╗
@@ -210,5 +210,14 @@ bindsym Mod1+r mode "resize"
 bar {
     	position top
     	status_command i3status
-}
 
+    colors {
+        background #0a0c10
+        statusline #f0f3f6
+
+        focused_workspace  #f0f3f6 #71b7ff
+        active_workspace   #f0f3f6 #333333
+        inactive_workspace #9ea7b3 #222222
+        urgent_workspace   #f0f3f6 #ff9492
+    }
+}
