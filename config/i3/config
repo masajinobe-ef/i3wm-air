@@ -32,8 +32,8 @@ default_floating_border none
 # ║                  Autostart Applications                              ║
 # ╚══════════════════════════════════════════════════════════════════════╝
 
-exec --no-startup-id dunst --config ~/.config/dunst/dunstrc &
-exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+# exec --no-startup-id dunst --config ~/.config/dunst/dunstrc &
+# exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # exec --no-startup-id feh --recursive --bg-fill --no-fehbg --randomize ~/Wallpapers/* &
 # exec sh ~/.local/bin/autorun &
 
