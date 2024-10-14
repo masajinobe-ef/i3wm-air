@@ -35,7 +35,7 @@ default_floating_border none
 exec --no-startup-id dunst --config ~/.config/dunst/dunstrc &
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 exec --no-startup-id feh --recursive --bg-fill --no-fehbg --randomize ~/Wallpapers/* &
-# exec sh ~/.local/bin/autorun & 
+# exec sh ~/.local/bin/autorun &
 
 # ╔══════════════════════════════════════════════════════════════════════╗
 # ║                     Volume Management                                ║
@@ -73,9 +73,6 @@ tiling_drag modifier titlebar
 # ║                          Keybindings                                 ║
 # ╚══════════════════════════════════════════════════════════════════════╝
 
-# Sync Dotfiles
-#bindsym Mod1+slash exec alacritty -e "sh ~/repos/i3wm-air/symlinks.sh"
-
 # Terminal
 bindsym Mod4+Return exec alacritty
 
@@ -98,7 +95,8 @@ bindsym Mod1+p exec --no-startup-id rofi -show power-menu -modi "power-menu:$HOM
 bindsym Mod4+z exec --no-startup-id ~/.local/bin/boomer
 
 # Screenshot
-bindsym Mod4+i exec --no-startup-id sh ~/.local/bin/screenshot --save &
+bindsym Mod4+bracketleft exec --no-startup-id sh ~/.local/bin/screenshot --clipboard &
+bindsym Mod4+bracketright exec --no-startup-id sh ~/.local/bin/screenshot --save &
 
 # Launch Applications
 bindsym Mod4+w exec chromium
