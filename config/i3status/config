@@ -31,8 +31,8 @@ wireless _first_ {
 # ╚══════════════════════════════════════════════════════════════════════╝
 
 volume master {
-        format = "VOL %volume"
-        format_muted = "VOL muted"
+        format = "V %volume"
+        format_muted = "V muted"
         device = "default"
         mixer = "Master"
         mixer_idx = 0
@@ -53,7 +53,7 @@ battery all {
 memory {
         format = "%used"
         threshold_degraded = "1G"
-        format_degraded = "MEMORY < %available"
+        format_degraded = "MEM < %available"
 }
 
 # ╔══════════════════════════════════════════════════════════════════════╗
@@ -61,6 +61,6 @@ memory {
 # ╚══════════════════════════════════════════════════════════════════════╝
 
 tztime local {
-        format = "%d/%m/%Y %H:%M"
+        format = "%d.%m.%Y %H:%M"
 }
 
