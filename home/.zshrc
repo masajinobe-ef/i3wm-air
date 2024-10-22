@@ -1,6 +1,14 @@
 #!/bin/zsh
 
 # ╔══════════════════════════════════════════════════════════════════════╗
+# ║                     Start tmux                                       ║
+# ╚══════════════════════════════════════════════════════════════════════╝
+
+if command -v tmux &> /dev/null; then
+    [ -z "$TMUX" ] && exec tmux
+fi
+
+# ╔══════════════════════════════════════════════════════════════════════╗
 # ║                     Powerlevel10k Instant Prompt                     ║
 # ╚══════════════════════════════════════════════════════════════════════╝
 
@@ -70,7 +78,7 @@ source $ZSH/oh-my-zsh.sh
 export EDITOR="nvim"
 export SUDO_EDITOR="nvim"
 export VISUAL="nvim"
-export TERM="xterm-256color"
+#export TERM="xterm-256color"
 export BROWSER="chromium"
 export LANG=en_US.UTF-8
 export ARCHFLAGS="-arch x86_64"

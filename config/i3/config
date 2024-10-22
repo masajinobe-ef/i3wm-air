@@ -79,12 +79,6 @@ bindsym Mod4+Return exec alacritty
 # Launcher Menu
 bindsym Mod4+r exec --no-startup-id rofi -show combi -combi-modes drun
 
-# File Manager (CLI)
-bindsym Mod4+e exec alacritty -e "yazi"
-
-# File Manager (GUI)
-bindsym Mod4+t exec thunar
-
 # Wifi Menu
 bindsym Mod1+u exec --no-startup-id sh ~/.local/bin/rofi-wifi-menu &
 
