@@ -1,12 +1,12 @@
 #!/bin/zsh
 
 # ╔══════════════════════════════════════════════════════════════════════╗
-# ║                     Start tmux                                       ║
+# ║                     Tmux                                             ║
 # ╚══════════════════════════════════════════════════════════════════════╝
 
-if command -v tmux &> /dev/null; then
-    [ -z "$TMUX" ] && exec tmux
-fi
+ZSH_TMUX_AUTOSTART=true
+ZSH_TMUX_AUTOSTART_ONCE=true
+ZSH_TMUX_AUTOCONNECT=true
 
 # ╔══════════════════════════════════════════════════════════════════════╗
 # ║                     Powerlevel10k Instant Prompt                     ║
@@ -62,6 +62,7 @@ HIST_STAMPS="dd/mm/yyyy"
 
 plugins=(
   git
+  tmux
   zsh-autosuggestions
   zsh-syntax-highlighting
   zsh-history-substring-search
